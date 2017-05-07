@@ -1,0 +1,153 @@
+{{define "body"}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li><a href="/campaigns">Campaigns</a>
+                </li>
+                <li class="active"><a href="/filteredcampaigns">Phishing Results</a>
+                </li>
+                {{if .IsRestrictedUser}}
+                {{else}}
+                <li><a href="/users">Users &amp; Groups</a>
+                </li>
+                <li><a href="/templates">Email Templates</a>
+                </li>
+                <li><a href="/landing_pages">Landing Pages</a>
+                </li>
+                <li><a href="/sending_profiles">Sending Profiles</a>
+                </li>
+                {{end}}
+                <li><a href="/settings">Settings</a>
+                </li>
+                <li><a href="/about">About</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">    
+    <div id="campaign-results">
+        <div class="row">
+            <h1 class="page-header" id="page-title">Phishing Results</h1>
+        </div>
+        <form name="search" id="search" action="/filteredcampaigns" method="GET">
+            <input type="text" name="filter" id="filter" style="width:40%;"></input>
+            Strict Match <input type="checkbox" name="exactmatch" id="exactmatch"></input>
+            <a class="btn btn-primary" href="#" onclick="submitSearchForm()">Search</a>
+        </form>
+        <br/>
+        <div style="display:none;" id="loading">
+            <i class="fa fa-spinner fa-spin fa-4x"></i>
+        </div>
+        <div style="display:none;" id="campaign-results-body">
+            <br />
+            <div id="summary-table">
+                <ul class="two-column">
+                    <li class="two-column">
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <p style="text-align:center;">Emails Sent</p>
+                                <div id="email_sent_chart" class="col-lg-7 col-md-7"></div>
+                                <div class="col-lg-5 col-md-5">
+                                    <ul id="email_sent_chart_legend" class="chartist-legend">
+                                    </ul>
+                                </div>
+                        </div>
+                    </li>
+                    <li class="two-column">
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <p style="text-align:center;">Emails Opened</p>
+                            <div id="email_chart" class="col-lg-7 col-md-7"></div>
+                            <div class="col-lg-5 col-md-5">
+                                <ul id="email_chart_legend" class="chartist-legend">
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="two-column">
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <p style="text-align:center;">Links Clicked</p>
+                            <div id="email_clicked_chart" class="col-lg-7 col-md-7"></div>
+                            <div class="col-lg-5 col-md-5">
+                                <ul id="email_clicked_chart_legend" class="chartist-legend">
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="two-column">
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <p style="text-align:center;">Credentials Entered</p>
+                            <div id="email_creds_chart" class="col-lg-7 col-md-7"></div>
+                            <div class="col-lg-5 col-md-5">
+                                <ul id="email_creds_chart_legend" class="chartist-legend">
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <br/>
+                <br/>
+                <br/>
+                <table >
+                    <tr>
+                        <td style="padding: 3px;">Emails Sent</td> <td align="right" style="padding: 3px;"><span id="emails-sent"></span></td>
+                        <td style="padding: 3px;">Emails Opened</td><td align="right" style="padding: 3px;"><span id="emails-opened"></span></td>
+                    </tr>
+                    <tr >
+                        <td style="padding: 3px;">Emails Clicked</td><td align="right" style="padding: 3px;"><span id="emails-clicked"></span></td>
+                        <td style="padding: 3px;">Credentials Entered</td><td align="right" style="padding: 3px;"><span id="emails-unique"></span></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="btn-group">
+                <button type="button" id="exportButton" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+	            <i class="fa fa-file-excel-o"></i> Export CSV
+                </button>
+	        <ul class="dropdown-menu" aria-labelledby="exportButton">
+	            <li><a href="#" onclick="exportCampaignsAsCSV()">Raw Results</a></li>
+	        </ul>
+    	    </div>
+            <div class="row">
+                <table id="campaignTable" class="table">
+                    <thead>
+                        <tr>
+                            <th class="col-md-3">Name</th>
+                            <th class="col-md-1">Created</th>
+                            <th class="col-md-1, pull-left">#Emails</th>
+                            <th class="col-md-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="row" style="display:none;" id="details-body">
+                <h4>Details</h4>
+                <div id="details-overflow"></div>
+                <table id="detailsTable" class="table">
+                    <thead>
+                        <tr>
+                            <th class="col-md-3">Name</th>
+                            <th class="col-md-1">Email</th>
+                            <th class="col-md-1">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="flashes" class="row"></div>
+</div>
+{{end}}
+{{define "scripts"}}
+<script src="/js/jquery.ui.widget.js"></script>
+<!-- d3, topojson, and datamaps for mapping -->
+<script src="/js/d3.min.js"></script>
+<script src="/js/topojson.min.js"></script>
+<script src="/js/datamaps.min.js"></script>
+<script src="/js/papaparse.min.js"></script>
+<script src="/js/sweetalert2.min.js"></script>
+<script src="/js/app/filtered_campaigns_results.js"></script>
+{{end}}
